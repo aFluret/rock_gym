@@ -1,0 +1,6 @@
+docs/
+.env
+*.db
+logs/
+backups/
+data/*.json

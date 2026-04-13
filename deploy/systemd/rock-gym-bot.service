@@ -1,0 +1,16 @@
+[Unit]
+Description=Rock Gym Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=rockgym
+Group=rockgym
+WorkingDirectory=/opt/rock_gym
+EnvironmentFile=/opt/rock_gym/.env
+ExecStart=/opt/rock_gym/.venv/bin/python /opt/rock_gym/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

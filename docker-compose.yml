@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  rock-gym-bot:
+    build: .
+    container_name: rock-gym-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./rock_gym.db:/app/rock_gym.db
+      - ./logs:/app/logs
+      - ./backups:/app/backups
