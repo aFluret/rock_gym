@@ -28,8 +28,14 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         reply_markup = get_admin_menu()
     else:
         reply_markup = get_user_main_menu(show_admin_return=is_admin)
-    welcome = (
-        "Привет! Я AI-помощник Rock Gym 💪\n"
-        "Помогу с вопросами, ценами и записью на бесплатную пробную тренировку."
-    )
+    if is_admin and not is_client_mode:
+        welcome = (
+            "Привет! Я AI-помощник Rock Gym 💪\n"
+            "Буду рад помогать тебе с управлением Rock Gym"
+        )
+    else:
+        welcome = (
+            "Привет! Я AI-помощник Rock Gym 💪\n"
+            "Помогу с вопросами, ценами и записью на бесплатную пробную тренировку."
+        )
     await update.message.reply_text(welcome, reply_markup=reply_markup)
