@@ -65,6 +65,7 @@ async def _rate_limit_guard(update, context) -> None:  # type: ignore[no-untyped
 
 def build_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("prices", show_prices))
     application.add_handler(build_booking_conversation())
 
     application.add_handler(MessageHandler(filters.Regex("^💰 Цены и скидки$"), show_prices))

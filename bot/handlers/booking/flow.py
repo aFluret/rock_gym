@@ -18,7 +18,7 @@ from bot.handlers.booking.keyboards import (
 from bot.handlers.booking.validators import validate_name, validate_phone
 from bot.keyboards.reply.user_menu import get_user_main_menu
 from bot.notifications.admin_notifier import send_booking_notification
-from data.gym_info import GYMS, PRICES
+from data.gym_info import GYMS
 from database.queries import (
     clear_booking_session,
     create_booking,
@@ -74,7 +74,7 @@ async def start_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
             "Вы уже были записаны на пробную тренировку ✅\n\n"
             "Повторно записываться на пробную не нужно. "
             "Можно прийти в любой зал в часы работы и оформить разовое посещение на месте,\n"
-            f"или купить абонемент:\n• {PRICES['abonement_12']}\n• {PRICES['unlimited']}\n\n"
+            "или выбрать абонемент из полного списка со скидками по команде /prices.\n\n"
             f"🏢 {GYMS['minsk']['title']}: {GYMS['minsk']['hours']}\n"
             f"🏢 {GYMS['lesnoy']['title']}: {GYMS['lesnoy']['hours']}"
         )
