@@ -41,7 +41,7 @@ async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.callback_query.edit_message_text(message)
         return
     if action == "rm":
-        save_reminder(settings.database_path, booking_id, minutes=30)
+        save_reminder(settings.database_path, booking_id, minutes=10)
         await update.callback_query.edit_message_text(
-            f"⏰ Напоминание по заявке #{booking_id} поставлено на 30 минут."
+            f"⏰ Напоминание по заявке #{booking_id} поставлено на 10 минут."
         )

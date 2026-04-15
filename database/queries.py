@@ -171,7 +171,7 @@ def get_due_reminders(database_path: Path) -> list[Row]:
     return rows
 
 
-def bump_reminder(database_path: Path, reminder_id: int, next_minutes: int = 30) -> None:
+def bump_reminder(database_path: Path, reminder_id: int, next_minutes: int = 10) -> None:
     with with_connection(database_path) as conn:
         conn.execute(
             """

@@ -24,6 +24,7 @@ from database.queries import (
     create_booking,
     get_latest_user_booking,
     get_booking_session,
+    save_reminder,
     track_event,
     upsert_booking_session,
     upsert_user,
@@ -226,6 +227,7 @@ async def booking_confirm_callback(update: Update, context: ContextTypes.DEFAULT
         booking_id=int(booking_id or 0),
         payload={"gym_location": context.user_data.get("booking_gym", "minsk")},
     )
+    save_reminder(settings.database_path, int(booking_id or 0), minutes=10)
 
     await update.callback_query.edit_message_text(
         "✅ Готово! Вы записаны на пробную тренировку.\n"
