@@ -52,7 +52,7 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     menu_buttons = {
         "💰 Цены и скидки",
         "📍 Адреса залов",
-        "❓ FAQ",
+        "❓ FAQ: Часто задаваемые вопросы",
         "❓ Помощь",
         "📅 Записаться",
         "🔔 Необработанные",

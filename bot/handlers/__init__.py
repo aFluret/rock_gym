@@ -29,7 +29,7 @@ MENU_TEXTS = {
     "📅 Записаться",
     "💰 Цены и скидки",
     "📍 Адреса залов",
-    "❓ FAQ",
+    "❓ FAQ: Часто задаваемые вопросы",
     "❓ Помощь",
     "👤 Переключиться на режим клиента",
     "🛠️ Вернуться в режим администратора",
@@ -70,7 +70,7 @@ def build_handlers(application: Application) -> None:
 
     application.add_handler(MessageHandler(filters.Regex("^💰 Цены и скидки$"), show_prices))
     application.add_handler(MessageHandler(filters.Regex("^📍 Адреса залов$"), show_locations))
-    application.add_handler(MessageHandler(filters.Regex(r"^❓ (FAQ|Помощь)$"), show_faq))
+    application.add_handler(MessageHandler(filters.Regex(r"^❓ (FAQ: Часто задаваемые вопросы|Помощь)$"), show_faq))
     application.add_handler(
         MessageHandler(filters.Regex("^👤 Переключиться на режим клиента$"), switch_to_client_mode)
     )
