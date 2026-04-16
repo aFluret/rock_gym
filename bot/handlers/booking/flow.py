@@ -234,7 +234,7 @@ async def booking_confirm_callback(update: Update, context: ContextTypes.DEFAULT
         "Возьмите форму, чистую обувь, воду и приходите за 10 минут до начала."
     )
     await send_booking_notification(
-        application=context.application,
+        bot=context.application.bot,
         admin_ids=settings.admin_ids,
         booking_id=int(booking_id or 0),
         name=context.user_data.get("booking_name", ""),

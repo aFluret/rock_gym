@@ -2,4 +2,5 @@ python-telegram-bot==22.1
 python-dotenv==1.0.0
 APScheduler==3.10.4
 httpx==0.28.1
+Flask
 pytest==8.3.3

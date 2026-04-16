@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from telegram import Bot
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application
 
@@ -8,7 +9,7 @@ from data.gym_info import GYMS
 
 
 async def send_booking_notification(
-    application: Application,
+    bot: Bot,
     admin_ids: tuple[int, ...],
     booking_id: int,
     name: str,
@@ -32,7 +33,7 @@ async def send_booking_notification(
     if telegram_id:
         keyboard[0].append(InlineKeyboardButton("💬 Написать", url=f"tg://user?id={telegram_id}"))
     for admin_id in admin_ids:
-        await application.bot.send_message(
+        await bot.send_message(
             chat_id=admin_id,
             text=text,
             reply_markup=InlineKeyboardMarkup(keyboard),

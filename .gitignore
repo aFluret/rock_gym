@@ -4,3 +4,4 @@ docs/
 logs/
 backups/
 data/*.json
+tilda.py
