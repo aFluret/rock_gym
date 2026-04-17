@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import json
 from pathlib import Path
 from sqlite3 import Row
@@ -144,16 +143,15 @@ def mark_booking_contacted(database_path: Path, booking_id: int) -> bool:
 
 
 def save_reminder(database_path: Path, booking_id: int, minutes: int) -> None:
-    reminder_at = datetime.utcnow() + timedelta(minutes=minutes)
     with with_connection(database_path) as conn:
         conn.execute(
             """
             INSERT INTO admin_reminders(booking_id, next_reminder_at, reminder_count)
-            VALUES (?, ?, 0)
+            VALUES (?, DATETIME(CURRENT_TIMESTAMP, ?), 0)
             ON CONFLICT(booking_id) DO UPDATE SET
                 next_reminder_at=excluded.next_reminder_at
             """,
-            (booking_id, reminder_at.isoformat(sep=" ")),
+            (booking_id, f"+{minutes} minutes"),
         )
 
 
@@ -169,6 +167,21 @@ def get_due_reminders(database_path: Path) -> list[Row]:
             """
         ).fetchall()
     return rows
+
+
+def ensure_pending_reminders(database_path: Path, minutes: int = 10) -> int:
+    with with_connection(database_path) as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO admin_reminders(booking_id, next_reminder_at, reminder_count)
+            SELECT b.id, DATETIME(b.created_at, ?), 0
+            FROM bookings b
+            LEFT JOIN admin_reminders ar ON ar.booking_id = b.id
+            WHERE b.status = 'pending' AND ar.id IS NULL
+            """,
+            (f"+{minutes} minutes",),
+        )
+    return cursor.rowcount
 
 
 def bump_reminder(database_path: Path, reminder_id: int, next_minutes: int = 10) -> None:
