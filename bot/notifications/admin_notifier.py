@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from telegram import Bot
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application
 
 from bot.utils.phone_formatter import display_phone
 from data.gym_info import GYMS
+
+LOGGER = logging.getLogger(__name__)
 
 
 async def send_booking_notification(
@@ -33,11 +37,14 @@ async def send_booking_notification(
     if telegram_id:
         keyboard[0].append(InlineKeyboardButton("💬 Написать", url=f"tg://user?id={telegram_id}"))
     for admin_id in admin_ids:
-        await bot.send_message(
-            chat_id=admin_id,
-            text=text,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-        )
+        try:
+            await bot.send_message(
+                chat_id=admin_id,
+                text=text,
+                reply_markup=InlineKeyboardMarkup(keyboard),
+            )
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Не удалось отправить booking-уведомление админу %s: %s", admin_id, exc)
 
 
 async def send_user_question_notification(
@@ -62,8 +69,11 @@ async def send_user_question_notification(
         [[InlineKeyboardButton("💬 Написать клиенту", url=f"tg://user?id={telegram_id}")]]
     )
     for admin_id in admin_ids:
-        await application.bot.send_message(
-            chat_id=admin_id,
-            text=text,
-            reply_markup=keyboard,
-        )
+        try:
+            await application.bot.send_message(
+                chat_id=admin_id,
+                text=text,
+                reply_markup=keyboard,
+            )
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Не удалось отправить question-уведомление админу %s: %s", admin_id, exc)
