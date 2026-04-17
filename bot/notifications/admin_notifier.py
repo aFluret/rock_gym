@@ -12,6 +12,20 @@ from data.gym_info import GYMS
 LOGGER = logging.getLogger(__name__)
 
 
+async def send_admin_text_notification(
+    bot: Bot,
+    admin_ids: tuple[int, ...],
+    text: str,
+) -> None:
+    if not admin_ids:
+        return
+    for admin_id in admin_ids:
+        try:
+            await bot.send_message(chat_id=admin_id, text=text)
+        except Exception as exc:  # noqa: BLE001
+            LOGGER.warning("Не удалось отправить уведомление админу %s: %s", admin_id, exc)
+
+
 async def send_booking_notification(
     bot: Bot,
     admin_ids: tuple[int, ...],
