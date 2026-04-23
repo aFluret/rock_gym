@@ -18,6 +18,44 @@ from database.queries import (
 LOGGER = logging.getLogger(__name__)
 
 
+def _has_booking_success_claim(text: str) -> bool:
+    lowered_text = text.lower()
+    success_markers = (
+        "успешно запис",
+        "вы записаны",
+        "вы записан",
+        "готово! вы записаны",
+        "запись подтверждена",
+    )
+    return any(marker in lowered_text for marker in success_markers)
+
+
+def _is_booking_confirmation_message(user_text: str) -> bool:
+    lowered_text = user_text.lower()
+    confirmation_markers = (
+        "подтвержда",
+        "подтверждаю",
+        "подтверждено",
+        "подтвердил",
+        "подтвердила",
+    )
+    return any(marker in lowered_text for marker in confirmation_markers)
+
+
+def _normalize_ai_booking_answer(user_text: str, ai_answer: str, has_booking: bool) -> str:
+    if has_booking:
+        return ai_answer
+    if not _is_booking_confirmation_message(user_text):
+        return ai_answer
+    if not _has_booking_success_claim(ai_answer):
+        return ai_answer
+    return (
+        "Понял Вас. Пока не вижу оформленной записи в системе.\n"
+        "Чтобы записаться, нажмите «📅 Записаться» и заполните короткую форму "
+        "(зал, имя и телефон)."
+    )
+
+
 def _should_forward_to_admin(user_text: str, ai_answer: str) -> bool:
     lower_user_text = user_text.lower()
     lower_ai_answer = ai_answer.lower()
@@ -115,6 +153,8 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if "запис" not in answer.lower() and len(messages) > 6 and not user_has_trial_history:
         answer = f"{answer}\n\nЕсли хотите, могу сразу записать Вас на бесплатную пробную 📅"
+    latest_booking = get_latest_user_booking(settings.database_path, update.effective_user.id)
+    answer = _normalize_ai_booking_answer(user_text, answer, has_booking=bool(latest_booking))
     if _should_forward_to_admin(user_text, answer):
         await send_user_question_notification(
             application=context.application,
