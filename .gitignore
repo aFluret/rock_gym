@@ -5,3 +5,6 @@ logs/
 backups/
 data/*.json
 tilda.py
+__pycache__/
+*.py[cod]
+.pytest_cache/
