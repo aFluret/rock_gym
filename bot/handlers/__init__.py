@@ -19,7 +19,6 @@ from bot.handlers.fallback import fallback_unknown
 from bot.handlers.info.faq import handle_faq_callback, show_faq
 from bot.handlers.info.locations import show_locations
 from bot.handlers.info.prices import show_prices
-from bot.handlers.mode_switch import switch_to_admin_mode, switch_to_client_mode
 from bot.handlers.start import start_command
 from bot.middleware.anti_spam import check_text_spam
 from bot.middleware.rate_limit import is_rate_limited
@@ -32,8 +31,6 @@ MENU_TEXTS = {
     "📍 Адреса залов",
     "❓ FAQ: Часто задаваемые вопросы",
     "❓ Помощь",
-    "👤 Переключиться на режим клиента",
-    "🛠️ Вернуться в режим администратора",
     "🔔 Необработанные",
     "📊 Статистика",
     "📢 Рассылка",
@@ -74,12 +71,6 @@ def build_handlers(application: Application) -> None:
     application.add_handler(MessageHandler(filters.Regex("^💰 Цены и скидки$"), show_prices))
     application.add_handler(MessageHandler(filters.Regex("^📍 Адреса залов$"), show_locations))
     application.add_handler(MessageHandler(filters.Regex(r"^❓ (FAQ: Часто задаваемые вопросы|Помощь)$"), show_faq))
-    application.add_handler(
-        MessageHandler(filters.Regex("^👤 Переключиться на режим клиента$"), switch_to_client_mode)
-    )
-    application.add_handler(
-        MessageHandler(filters.Regex("^🛠️ Вернуться в режим администратора$"), switch_to_admin_mode)
-    )
 
     application.add_handler(MessageHandler(filters.Regex("^🔔 Необработанные$"), show_pending))
     application.add_handler(MessageHandler(filters.Regex("^📊 Статистика$"), show_stats))

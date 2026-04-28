@@ -57,10 +57,8 @@ def _normalize_ai_booking_answer(user_text: str, ai_answer: str, has_booking: bo
     )
 
 
-def _should_handle_ai_dialog(*, is_admin: bool, ui_mode: str) -> bool:
-    if is_admin and ui_mode == "admin":
-        return False
-    return True
+def _should_handle_ai_dialog(*, is_admin: bool) -> bool:
+    return not is_admin
 
 
 def _should_forward_to_admin(user_text: str, ai_answer: str) -> bool:
@@ -93,11 +91,10 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return
     settings = context.application.bot_data["settings"]
     has_admin_access = is_admin(settings, update.effective_user.id)
-    ui_mode = context.user_data.get("ui_mode", "admin" if has_admin_access else "client")
-    if not _should_handle_ai_dialog(is_admin=has_admin_access, ui_mode=ui_mode):
+    if not _should_handle_ai_dialog(is_admin=has_admin_access):
         await update.message.reply_text(
-            "Вы в режиме администратора. Используйте кнопки админ-меню "
-            "или переключитесь в клиентский режим."
+            "Для администратора доступно админ-меню. "
+            "Используйте кнопки управления заявками."
         )
         return
     groq_service = context.application.bot_data["groq_service"]
@@ -112,8 +109,6 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         "📊 Статистика",
         "📢 Рассылка",
         "📋 Все заявки",
-        "👤 Переключиться на режим клиента",
-        "🛠️ Вернуться в режим администратора",
         "⬅️ Назад",
     }
     if user_text in menu_buttons:

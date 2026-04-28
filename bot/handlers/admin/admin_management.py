@@ -194,7 +194,6 @@ async def try_activate_admin_invite(
         update.effective_user.username,
         settings.owner_id,
     )
-    context.user_data["ui_mode"] = "admin"
     track_event(
         settings.database_path,
         "admin_invite_accepted",

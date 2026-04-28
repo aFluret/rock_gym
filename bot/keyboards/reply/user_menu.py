@@ -3,14 +3,12 @@ from __future__ import annotations
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 
 
-def get_user_main_menu(show_admin_return: bool = False) -> ReplyKeyboardMarkup:
+def get_user_main_menu() -> ReplyKeyboardMarkup:
     keyboard = [
         [KeyboardButton("💬 Задать вопрос"), KeyboardButton("📅 Записаться")],
         [KeyboardButton("💰 Цены и скидки"), KeyboardButton("📍 Адреса залов")],
         [KeyboardButton("❓ FAQ: Часто задаваемые вопросы")],
     ]
-    if show_admin_return:
-        keyboard.append([KeyboardButton("🛠️ Вернуться в режим администратора")])
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
         resize_keyboard=True,

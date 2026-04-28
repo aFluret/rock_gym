@@ -32,10 +32,10 @@ def test_keeps_regular_ai_answer_for_non_confirmation_message() -> None:
 
 
 def test_blocks_ai_dialog_for_admin_in_admin_mode() -> None:
-    should_handle = _should_handle_ai_dialog(is_admin=True, ui_mode="admin")
+    should_handle = _should_handle_ai_dialog(is_admin=True)
     assert should_handle is False
 
 
-def test_allows_ai_dialog_for_admin_in_client_mode() -> None:
-    should_handle = _should_handle_ai_dialog(is_admin=True, ui_mode="client")
+def test_allows_ai_dialog_for_regular_user() -> None:
+    should_handle = _should_handle_ai_dialog(is_admin=False)
     assert should_handle is True

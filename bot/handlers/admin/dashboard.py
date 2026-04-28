@@ -11,9 +11,7 @@ from database.queries import get_funnel_stats, get_pending_bookings, get_stats_s
 def _is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     user_id = update.effective_user.id if update.effective_user else 0
     settings = context.application.bot_data["settings"]
-    has_admin_access = is_admin(settings, user_id)
-    is_admin_mode = context.user_data.get("ui_mode", "admin") == "admin"
-    return has_admin_access and is_admin_mode
+    return is_admin(settings, user_id)
 
 
 def _pending_actions_keyboard(booking_id: int) -> InlineKeyboardMarkup:

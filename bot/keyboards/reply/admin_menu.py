@@ -10,9 +10,4 @@ def get_admin_menu(*, show_owner_tools: bool = False) -> ReplyKeyboardMarkup:
     ]
     if show_owner_tools:
         keyboard.append([KeyboardButton("🛡️ Управление администраторами")])
-    keyboard.extend(
-        [
-        [KeyboardButton("👤 Переключиться на режим клиента")],
-        ]
-    )
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
