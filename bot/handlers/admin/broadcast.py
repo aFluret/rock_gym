@@ -10,6 +10,7 @@ from telegram.ext import (
     filters,
 )
 
+from bot.security import is_admin
 from database.queries import get_all_user_telegram_ids
 
 BROADCAST_TEXT = 0
@@ -17,9 +18,10 @@ BROADCAST_TEXT = 0
 
 def _is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     user_id = update.effective_user.id if update.effective_user else 0
-    is_admin = user_id in context.application.bot_data["settings"].admin_ids
+    settings = context.application.bot_data["settings"]
+    has_admin_access = is_admin(settings, user_id)
     is_admin_mode = context.user_data.get("ui_mode", "admin") == "admin"
-    return is_admin and is_admin_mode
+    return has_admin_access and is_admin_mode
 
 
 async def start_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

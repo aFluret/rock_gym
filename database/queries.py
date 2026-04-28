@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import secrets
 from pathlib import Path
 from sqlite3 import Row
 from typing import Any
@@ -362,3 +363,156 @@ def get_latest_user_booking(database_path: Path, telegram_id: int) -> Row | None
             (telegram_id,),
         ).fetchone()
     return row
+
+
+def bootstrap_admins(database_path: Path, owner_id: int, admin_ids: tuple[int, ...]) -> None:
+    if not owner_id and not admin_ids:
+        return
+    seed_ids = set(admin_ids)
+    if owner_id:
+        seed_ids.add(owner_id)
+    with with_connection(database_path) as conn:
+        for telegram_id in seed_ids:
+            conn.execute(
+                """
+                INSERT INTO bot_admins(telegram_id, added_by, status)
+                VALUES(?, ?, 'active')
+                ON CONFLICT(telegram_id) DO UPDATE SET
+                    status='active',
+                    updated_at=CURRENT_TIMESTAMP
+                """,
+                (telegram_id, owner_id or telegram_id),
+            )
+
+
+def is_admin_user(database_path: Path, telegram_id: int) -> bool:
+    with with_connection(database_path) as conn:
+        row = conn.execute(
+            """
+            SELECT 1
+            FROM bot_admins
+            WHERE telegram_id = ? AND status = 'active'
+            LIMIT 1
+            """,
+            (telegram_id,),
+        ).fetchone()
+    return bool(row)
+
+
+def get_active_admins(database_path: Path) -> list[Row]:
+    with with_connection(database_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT
+                a.telegram_id,
+                COALESCE(u.username, a.username) AS username,
+                a.created_at
+            FROM bot_admins a
+            LEFT JOIN users u ON u.telegram_id = a.telegram_id
+            WHERE a.status = 'active'
+            ORDER BY a.created_at ASC
+            """
+        ).fetchall()
+    return rows
+
+
+def get_active_admin_ids(database_path: Path) -> tuple[int, ...]:
+    rows = get_active_admins(database_path)
+    return tuple(int(row["telegram_id"]) for row in rows)
+
+
+def add_admin(
+    database_path: Path,
+    telegram_id: int,
+    username: str | None,
+    owner_id: int,
+) -> None:
+    with with_connection(database_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO bot_admins(telegram_id, username, added_by, status)
+            VALUES(?, ?, ?, 'active')
+            ON CONFLICT(telegram_id) DO UPDATE SET
+                username=COALESCE(excluded.username, bot_admins.username),
+                status='active',
+                updated_at=CURRENT_TIMESTAMP
+            """,
+            (telegram_id, username, owner_id),
+        )
+
+
+def remove_admin(database_path: Path, telegram_id: int) -> bool:
+    with with_connection(database_path) as conn:
+        cursor = conn.execute(
+            """
+            UPDATE bot_admins
+            SET status='removed', updated_at=CURRENT_TIMESTAMP
+            WHERE telegram_id = ? AND status = 'active'
+            """,
+            (telegram_id,),
+        )
+    return cursor.rowcount > 0
+
+
+def create_admin_invite(database_path: Path, owner_id: int, ttl_minutes: int = 5) -> tuple[str, Row]:
+    token = secrets.token_urlsafe(18)
+    with with_connection(database_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO admin_invites(token, created_by, status, expires_at)
+            VALUES(?, ?, 'active', DATETIME(CURRENT_TIMESTAMP, ?))
+            """,
+            (token, owner_id, f"+{ttl_minutes} minutes"),
+        )
+        row = conn.execute(
+            """
+            SELECT token, status, created_at, expires_at
+            FROM admin_invites
+            WHERE token = ?
+            """,
+            (token,),
+        ).fetchone()
+    return token, row
+
+
+def mark_expired_admin_invites(database_path: Path) -> int:
+    with with_connection(database_path) as conn:
+        cursor = conn.execute(
+            """
+            UPDATE admin_invites
+            SET status='expired'
+            WHERE status='active' AND expires_at <= CURRENT_TIMESTAMP
+            """
+        )
+    return cursor.rowcount
+
+
+def get_admin_invite(database_path: Path, token: str) -> Row | None:
+    mark_expired_admin_invites(database_path)
+    with with_connection(database_path) as conn:
+        row = conn.execute(
+            """
+            SELECT id, token, status, created_by, created_at, expires_at, used_by, used_at
+            FROM admin_invites
+            WHERE token = ?
+            LIMIT 1
+            """,
+            (token,),
+        ).fetchone()
+    return row
+
+
+def consume_admin_invite(database_path: Path, token: str, used_by: int) -> bool:
+    mark_expired_admin_invites(database_path)
+    with with_connection(database_path) as conn:
+        cursor = conn.execute(
+            """
+            UPDATE admin_invites
+            SET status='used', used_by=?, used_at=CURRENT_TIMESTAMP
+            WHERE token = ?
+              AND status='active'
+              AND expires_at > CURRENT_TIMESTAMP
+            """,
+            (used_by, token),
+        )
+    return cursor.rowcount > 0

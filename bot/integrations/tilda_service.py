@@ -9,6 +9,7 @@ from bot.notifications.admin_notifier import (
     send_admin_text_notification,
     send_booking_notification,
 )
+from bot.security import get_admin_recipient_ids
 from bot.utils.phone_formatter import normalize_phone
 from config import Settings
 from database.queries import create_booking, track_event
@@ -154,7 +155,7 @@ async def handle_tilda_booking(
     if form_type != "trial":
         await send_admin_text_notification(
             bot=bot,
-            admin_ids=settings.admin_ids,
+            admin_ids=get_admin_recipient_ids(settings),
             text=_build_tilda_text_notification(form_data),
         )
         track_event(
@@ -183,7 +184,7 @@ async def handle_tilda_booking(
     )
     await send_booking_notification(
         bot=bot,
-        admin_ids=settings.admin_ids,
+        admin_ids=get_admin_recipient_ids(settings),
         booking_id=booking_number,
         name=name,
         phone=phone,

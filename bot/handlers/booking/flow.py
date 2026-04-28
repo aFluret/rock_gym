@@ -18,6 +18,7 @@ from bot.handlers.booking.keyboards import (
 from bot.handlers.booking.validators import validate_name, validate_phone
 from bot.keyboards.reply.user_menu import get_user_main_menu
 from bot.notifications.admin_notifier import send_booking_notification
+from bot.security import get_admin_recipient_ids
 from data.gym_info import GYMS
 from database.queries import (
     clear_booking_session,
@@ -235,7 +236,7 @@ async def booking_confirm_callback(update: Update, context: ContextTypes.DEFAULT
     )
     await send_booking_notification(
         bot=context.application.bot,
-        admin_ids=settings.admin_ids,
+        admin_ids=get_admin_recipient_ids(settings),
         booking_id=int(booking_id or 0),
         name=context.user_data.get("booking_name", ""),
         phone=context.user_data.get("booking_phone", ""),

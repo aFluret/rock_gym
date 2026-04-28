@@ -11,6 +11,7 @@ from bot.middleware.logging import configure_logging
 from bot.notifications.reminder_scheduler import start_reminder_scheduler
 from config import get_settings
 from database.db import init_database
+from database.queries import bootstrap_admins
 
 
 async def run() -> None:
@@ -20,6 +21,7 @@ async def run() -> None:
 
     configure_logging(settings.log_level)
     init_database(settings.database_path)
+    bootstrap_admins(settings.database_path, settings.owner_id, settings.admin_ids)
 
     application = Application.builder().token(settings.bot_token).build()
     application.bot_data["settings"] = settings
@@ -34,7 +36,7 @@ async def run() -> None:
     )
 
     build_handlers(application)
-    start_reminder_scheduler(application, settings.database_path, settings.admin_ids)
+    start_reminder_scheduler(application, settings.database_path, settings)
 
     await application.initialize()
     await application.start()

@@ -17,6 +17,7 @@ class Settings:
     groq_model: str
     database_path: Path
     admin_ids: tuple[int, ...]
+    owner_id: int
     log_level: str
     crm_webhook_url: str
     groq_max_retries: int
@@ -43,6 +44,13 @@ def _parse_admin_ids(raw_admin_ids: str) -> tuple[int, ...]:
     return tuple(admin_ids)
 
 
+def _parse_owner_id(raw_owner_id: str) -> int:
+    value = raw_owner_id.strip()
+    if not value:
+        return 0
+    return int(value) if value.isdigit() else 0
+
+
 def get_settings() -> Settings:
     database_url = os.getenv("DATABASE_URL", "sqlite:///rock_gym.db")
     return Settings(
@@ -51,6 +59,7 @@ def get_settings() -> Settings:
         groq_model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
         database_path=_parse_database_path(database_url),
         admin_ids=_parse_admin_ids(os.getenv("ADMIN_IDS", "")),
+        owner_id=_parse_owner_id(os.getenv("OWNER_ID", "")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
         crm_webhook_url=os.getenv("CRM_WEBHOOK_URL", ""),
         groq_max_retries=int(os.getenv("GROQ_MAX_RETRIES", "3")),

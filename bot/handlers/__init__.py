@@ -10,6 +10,7 @@ from telegram.ext import (
 )
 
 from bot.handlers.admin.broadcast import build_broadcast_conversation
+from bot.handlers.admin.admin_management import build_owner_admin_handlers
 from bot.handlers.admin.dashboard import show_pending, show_stats
 from bot.handlers.admin.notifications import handle_admin_action
 from bot.handlers.booking.flow import build_booking_conversation
@@ -37,6 +38,7 @@ MENU_TEXTS = {
     "📊 Статистика",
     "📢 Рассылка",
     "📋 Все заявки",
+    "🛡️ Управление администраторами",
     "⬅️ Назад",
 }
 
@@ -64,6 +66,7 @@ async def _rate_limit_guard(update, context) -> None:  # type: ignore[no-untyped
 
 
 def build_handlers(application: Application) -> None:
+    owner_message_handler, owner_callback_handler = build_owner_admin_handlers()
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("prices", show_prices))
     application.add_handler(build_booking_conversation())
@@ -82,8 +85,10 @@ def build_handlers(application: Application) -> None:
     application.add_handler(MessageHandler(filters.Regex("^📊 Статистика$"), show_stats))
     application.add_handler(MessageHandler(filters.Regex("^📋 Все заявки$"), show_pending))
     application.add_handler(build_broadcast_conversation())
+    application.add_handler(owner_message_handler)
 
     application.add_handler(CallbackQueryHandler(handle_admin_action, pattern=r"^adm:"))
+    application.add_handler(owner_callback_handler)
     application.add_handler(CallbackQueryHandler(handle_faq_callback, pattern=r"^faq:"))
 
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, _anti_spam_guard), group=1)

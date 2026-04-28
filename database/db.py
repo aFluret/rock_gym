@@ -70,6 +70,29 @@ def _schema() -> tuple[str, ...]:
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
         """,
+        """
+        CREATE TABLE IF NOT EXISTS bot_admins (
+            id INTEGER PRIMARY KEY,
+            telegram_id INTEGER UNIQUE NOT NULL,
+            username TEXT,
+            added_by INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'removed')),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS admin_invites (
+            id INTEGER PRIMARY KEY,
+            token TEXT UNIQUE NOT NULL,
+            created_by INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'used', 'expired')),
+            used_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            expires_at DATETIME NOT NULL,
+            used_at DATETIME
+        );
+        """,
     )
 
 

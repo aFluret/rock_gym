@@ -8,6 +8,7 @@ from telegram.ext import ContextTypes
 from bot.ai.category_detector import detect_category
 from bot.ai.context_manager import get_optimized_context
 from bot.notifications.admin_notifier import send_user_question_notification
+from bot.security import get_admin_recipient_ids, is_admin
 from database.queries import (
     get_latest_user_booking,
     has_user_trial_history,
@@ -91,9 +92,9 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if context.user_data.get("active_flow") in {"booking", "broadcast"}:
         return
     settings = context.application.bot_data["settings"]
-    is_admin = update.effective_user.id in settings.admin_ids
-    ui_mode = context.user_data.get("ui_mode", "admin" if is_admin else "client")
-    if not _should_handle_ai_dialog(is_admin=is_admin, ui_mode=ui_mode):
+    has_admin_access = is_admin(settings, update.effective_user.id)
+    ui_mode = context.user_data.get("ui_mode", "admin" if has_admin_access else "client")
+    if not _should_handle_ai_dialog(is_admin=has_admin_access, ui_mode=ui_mode):
         await update.message.reply_text(
             "Вы в режиме администратора. Используйте кнопки админ-меню "
             "или переключитесь в клиентский режим."
@@ -172,7 +173,7 @@ async def handle_ai_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if _should_forward_to_admin(user_text, answer):
         await send_user_question_notification(
             application=context.application,
-            admin_ids=settings.admin_ids,
+            admin_ids=get_admin_recipient_ids(settings),
             telegram_id=update.effective_user.id,
             first_name=update.effective_user.first_name,
             username=update.effective_user.username,

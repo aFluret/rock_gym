@@ -3,17 +3,19 @@ from __future__ import annotations
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from telegram.ext import Application
 
+from bot.security import get_admin_recipient_ids
 from database.queries import bump_reminder, ensure_pending_reminders, get_due_reminders
 
 
 def start_reminder_scheduler(
     application: Application,
     database_path,
-    admin_ids: tuple[int, ...],
+    settings,
 ) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone="UTC")
 
     async def _send_due_reminders() -> None:
+        admin_ids = get_admin_recipient_ids(settings)
         if not admin_ids:
             return
         ensure_pending_reminders(database_path, minutes=10)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from bot.security import is_admin
 from database.queries import get_booking_by_id, mark_booking_contacted, save_reminder, track_event
 
 
@@ -11,7 +12,7 @@ async def handle_admin_action(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
     user_id = update.effective_user.id if update.effective_user else 0
     settings = context.application.bot_data["settings"]
-    if user_id not in settings.admin_ids:
+    if not is_admin(settings, user_id):
         await update.callback_query.answer("Недостаточно прав", show_alert=True)
         return
     await update.callback_query.answer()
